@@ -1,0 +1,176 @@
+{
+  "name": "symfocus",
+  "displayName": "Symfocus",
+  "description": "AI-powered symbol explanations in the sidebar, backed by any OpenAI-compatible endpoint.",
+  "version": "0.1.0",
+  "publisher": "DenizhanDaklr",
+  "icon": "media/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zelosleone/symfocus"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "symfocus.explainSymbol",
+        "title": "Symfocus: Explain Symbol at Cursor",
+        "category": "Symfocus"
+      },
+      {
+        "command": "symfocus.openFile",
+        "title": "Symfocus: Open File"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "symfocus.explainSymbol",
+          "when": "editorTextFocus"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "symfocus.explainSymbol",
+        "key": "ctrl+alt+e",
+        "mac": "cmd+alt+e",
+        "when": "editorTextFocus"
+      }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "symfocus",
+          "title": "Symfocus",
+          "icon": "media/icon.png"
+        }
+      ]
+    },
+    "views": {
+      "symfocus": [
+        {
+          "type": "webview",
+          "id": "symfocus.explanation",
+          "name": "Explanation"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Symfocus",
+      "properties": {
+        "symfocus.openai.baseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Base URL for an OpenAI-compatible API, without /chat/completions (e.g. https://api.openai.com/v1, or your proxy, LiteLLM, Ollama, etc.). Required."
+        },
+        "symfocus.openai.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key (token) for the OpenAI-compatible endpoint. Required. Never shared or logged."
+        },
+        "symfocus.openai.model": {
+          "type": "string",
+          "default": "",
+          "description": "Model name for chat completions (e.g. gpt-4o-mini, gpt-4o, claude-3-5-sonnet via proxy, llama3, etc.). Required."
+        },
+        "symfocus.context.includeDetail": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include LSP detail (e.g. function signature) in the prompt."
+        },
+        "symfocus.context.includeDefinition": {
+          "type": "boolean",
+          "default": true,
+          "description": "Call executeDefinitionProvider and add \"Defined in path:line\" when in another file or different range."
+        },
+        "symfocus.context.includeReferences": {
+          "type": "boolean",
+          "default": false,
+          "description": "Call executeReferenceProvider and add a \"Used in …\" line. Can be slower in large workspaces."
+        },
+        "symfocus.context.referencesCap": {
+          "type": "number",
+          "default": 5,
+          "description": "Max reference locations to include when includeReferences is true."
+        },
+        "symfocus.explanation.mode": {
+          "type": "string",
+          "enum": [
+            "quick",
+            "standard",
+            "deep"
+          ],
+          "default": "standard",
+          "enumDescriptions": [
+            "Summary only (1-2 sentences) — fast, no fluff",
+            "Summary + relevant sections based on symbol type",
+            "Full analysis with all applicable sections"
+          ],
+          "description": "How detailed the explanation should be."
+        },
+        "symfocus.explanation.experienceLevel": {
+          "type": "string",
+          "enum": [
+            "junior",
+            "senior"
+          ],
+          "default": "senior",
+          "enumDescriptions": [
+            "More verbose explanations with basic concepts explained",
+            "Concise explanations assuming familiarity with the language"
+          ],
+          "description": "Your experience level — affects verbosity and whether basic concepts are explained."
+        },
+        "symfocus.explanation.projectContext": {
+          "type": "string",
+          "default": "",
+          "description": "Describe your project domain (e.g., 'robotics control system', 'financial trading platform', 'React web app'). Leave empty for auto-detection from README/package.json."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run package",
+    "build:css": "tailwindcss -i src/webview/styles.css -o media/symfocus.css --minify",
+    "compile": "npm run build:css && npm run check-types && npm run lint && node esbuild.js",
+    "watch": "npm-run-all -p watch:*",
+    "watch:css": "tailwindcss -i src/webview/styles.css -o media/symfocus.css --watch",
+    "watch:esbuild": "node esbuild.js --watch",
+    "watch:tsc": "tsc -noEmit -watch -p ./",
+    "package": "npm run build:css && npm run check-types && npm run lint && node esbuild.js --production",
+    "compile-tests": "tsc -p . --outDir out",
+    "watch-tests": "tsc -p . -w --outDir out",
+    "pretest": "npm run compile-tests && npm run compile && npm run lint",
+    "check-types": "tsc --noEmit",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.2",
+    "@types/node": "20.19.30",
+    "@types/vscode": "1.85.0",
+    "@vscode/test-cli": "0.0.9",
+    "esbuild": "0.27.2",
+    "eslint": "9.39.2",
+    "knip": "5.82.1",
+    "npm-run-all": "4.1.5",
+    "tailwindcss": "3.4.19",
+    "typescript": "5.9.3",
+    "typescript-eslint": "8.53.1"
+  },
+  "dependencies": {
+    "highlight.js": "11.11.1",
+    "ignore": "5.3.2",
+    "isomorphic-dompurify": "2.35.0",
+    "marked": "12.0.2",
+    "marked-highlight": "2.2.3",
+    "minimatch": "9.0.5"
+  }
+}

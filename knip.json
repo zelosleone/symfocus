@@ -1,0 +1,6 @@
+{
+  "ignore": [
+    "media/symfocus.css",
+    "src/webview/styles.css"
+  ]
+}
